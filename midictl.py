@@ -1,20 +1,30 @@
 import os, sys, mido
 
-devicename = 'USB O2 MIDI 1'
+# Settings #
+devicename = 'USB O2 MIDI 1'  # Get by running python -c 'import mido; print(mido.get_input_names())'
+
 
 def process(msg):
-    # Rogue-Pix3l Volume Control #
-    if msg.type == 'control_change' and msg.control == 8:
-        percent = int(msg.value) * 100
-        percent = percent/127
-        os.system('amixer --quiet -c 0 set Capture ' + str(percent) + '%')
-        print('Desktop Percent = ' + str(percent))
-    # Teamspeak 3 USB Audio Physical Loopback Volume Control #
-    if msg.type == 'control_change' and msg.control == 10:
-        percent = int(msg.value) * 100
-        percent = percent/127
-        os.system('amixer --quiet -c 3 set Speaker ' + str(percent) + '%')
-        print('TS3 Percent = ' + str(percent))
+    if msg.type == 'control_change':
+        # Rogue-Pix3l Volume Control #
+        if msg.control == 8:
+            percent = int(msg.value) * 100
+            percent = percent/127
+            os.system('amixer --quiet -c 0 set Capture ' + str(percent) + '%')
+            print('Desktop Percent = ' + str(percent))
+        # Teamspeak 3 USB Audio Physical Loopback Volume Control #
+        if msg.control == 10:
+            percent = int(msg.value) * 100
+            percent = percent/127
+            os.system('amixer --quiet -c 3 set Speaker ' + str(percent) + '%')
+            print('TS3 Percent = ' + str(percent))
+    # SFX Test #
+    elif msg.type == 'note_on':
+        if msg.note == 72 and msg.velocity > 0:
+            print('Note 72 hit')
+        
+        
+
 
 def main():
     dev = mido.open_input(devicename)
@@ -22,4 +32,8 @@ def main():
         process(msg)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Quitting...')
+        quit()
